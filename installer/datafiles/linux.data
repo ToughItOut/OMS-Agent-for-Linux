@@ -119,6 +119,26 @@ if [ -d "$OMS_CERTS_DIR" ]; then
     chmod -R 750 "$OMS_CERTS_DIR"
 fi
 
+%Postinstall_590
+# If performing upgrade and NPM binary is present then do setcap
+if ! ${{PERFORMING_UPGRADE_NOT}}; then
+    NPM_BINARY_CAP_SCRIPT=/opt/microsoft/omsconfig/Scripts/NPMAgentBinaryCap.sh
+    NPM_BINARY_LOC=/opt/microsoft/omsagent/plugin/npmd_agent
+    NPM_BINARY_LOC_x32=$NPM_BINARY_LOC"_x32"
+    NPM_BINARY_LOC_x64=$NPM_BINARY_LOC"_x64"
+    # Check if Script file exists
+    if [ -f $NPM_BINARY_CAP_SCRIPT ]; then
+        # Check if Binary file exists
+        if [ -f $NPM_BINARY_LOC_x64 ]; then
+            ./$NPM_BINARY_CAP_SCRIPT "$NPM_BINARY_LOC_x64"
+        elif [ -f $NPM_BINARY_LOC_x32 ]; then
+            ./$NPM_BINARY_CAP_SCRIPT "$NPM_BINARY_LOC_x32"
+        elif [ -f $NPM_BINARY_LOC ]; then
+            ./$NPM_BINARY_CAP_SCRIPT "$NPM_BINARY_LOC"
+        fi
+    fi
+fi
+
 %Postinstall_600
 ${{OMS_SERVICE}} start
 
