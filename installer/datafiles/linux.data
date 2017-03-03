@@ -121,23 +121,36 @@ fi
 
 %Postinstall_590
 # If performing upgrade and NPM binary is present then do setcap
+echo "NPMD: Verifying requirements for NPMD"
 if ! ${{PERFORMING_UPGRADE_NOT}}; then
+    echo "NPMD: Case of upgrade hence checking for script file presence"
     NPM_BINARY_CAP_SCRIPT=/opt/microsoft/omsconfig/Scripts/NPMAgentBinaryCap.sh
     NPM_BINARY_LOC=/opt/microsoft/omsagent/plugin/npmd_agent
     NPM_BINARY_LOC_x32=$NPM_BINARY_LOC"_x32"
     NPM_BINARY_LOC_x64=$NPM_BINARY_LOC"_x64"
     # Check if Script file exists
     if [ -f $NPM_BINARY_CAP_SCRIPT ]; then
+        echo "NPMD: Script file exists, checking if binary exists to give capability"
         # Check if Binary file exists
         if [ -f $NPM_BINARY_LOC_x64 ]; then
+            echo "NPMD: $NPM_BINARY_LOC_x64 exists so giving capability!"
             ./$NPM_BINARY_CAP_SCRIPT "$NPM_BINARY_LOC_x64"
         elif [ -f $NPM_BINARY_LOC_x32 ]; then
+            echo "NPMD: $NPM_BINARY_LOC_x32 exists so giving capability!"
             ./$NPM_BINARY_CAP_SCRIPT "$NPM_BINARY_LOC_x32"
         elif [ -f $NPM_BINARY_LOC ]; then
+            echo "NPMD: $NPM_BINARY_LOC exists so giving capability!"
             ./$NPM_BINARY_CAP_SCRIPT "$NPM_BINARY_LOC"
+        else
+            echo "NPMD: No binary (even x32/x64) exists at $NPM_BINARY_LOC so skipping giving capability!"
         fi
+    else
+        echo "NPMD: Script file $NPM_BINARY_CAP_SCRIPT is absent so skipped giving capability!"
     fi
+else
+    echo "NPMD: Not upgrading right now!"
 fi
+echo "NPMD: Steps completed"
 
 %Postinstall_600
 ${{OMS_SERVICE}} start
